@@ -16,11 +16,12 @@
 #define RESISTOR_LEFT A4
 #define RESISTOR_RIGHT A5
 
-//time (microseconds) to wait before a state change is accepted
-#define DEBOUNCE_DELAY 500
 
 //period in microseconds
 #define CLOCK_PERIOD 8000
+
+//time (microseconds) to wait before a state change is accepted
+#define DEBOUNCE_DELAY CLOCK_PERIOD/8
 
 //define tile commands
 #define COMMAND_ENABLE_TOP 1
@@ -204,10 +205,16 @@ void loop() {
           is_addressed = false;
         }
       }else{
+        digitalWrite(LED_GREEN, LOW);
+        digitalWrite(LED_RED, HIGH);
         if(is_addressed){
+          digitalWrite(LED_GREEN, HIGH);
+          digitalWrite(LED_RED, LOW);
           if(cycle_count < ID_WIDTH + COMMAND_WIDTH){
-            command = command | (data_state << cycle_count);
+            command = command | (data_state << (cycle_count-ID_WIDTH));
           }else{
+            digitalWrite(LED_GREEN, LOW);
+            digitalWrite(LED_RED, HIGH);
             switch(command){
               case COMMAND_ENABLE_TOP:
                 if(cycle_count == CYCLE_PERIOD - 1){
@@ -246,9 +253,13 @@ void loop() {
                 is_addressed = false;
                 break;
               case COMMAND_LEFT_RESISTOR:
+                digitalWrite(LED_GREEN, HIGH);
+                digitalWrite(LED_RED, LOW);
                 digitalWrite(DATA_WRITE,!(1&(analogRead(RESISTOR_LEFT)>>(cycle_count - ID_WIDTH - COMMAND_WIDTH))));
                 break;
               case COMMAND_RIGHT_RESISTOR:
+                digitalWrite(LED_GREEN, HIGH);
+                digitalWrite(LED_RED, LOW);
                 digitalWrite(DATA_WRITE,!(1&(analogRead(RESISTOR_RIGHT)>>(cycle_count - ID_WIDTH - COMMAND_WIDTH))));
                 break;
               case COMMAND_RESET:
@@ -263,6 +274,8 @@ void loop() {
                 clearOutputs();
                 break;
               case COMMAND_CHIRP:
+                digitalWrite(LED_GREEN, HIGH);
+                digitalWrite(LED_RED, LOW);
                 digitalWrite(DATA_WRITE, LOW);
                 break;
             }

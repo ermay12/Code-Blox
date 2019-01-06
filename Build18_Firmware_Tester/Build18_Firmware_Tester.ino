@@ -6,14 +6,10 @@ void setup() {
 }
 
 void loop() {
-  delay(10);
   if (Serial.available()) {
     // read the incoming byte:
     int pin = Serial.parseInt();
     String action = Serial.readStringUntil('\n');
-    while(Serial.available()){
-      Serial.read();
-    }
 
     if(pin > 13 || pin < 0){
       return;
