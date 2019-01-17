@@ -10,7 +10,6 @@
 #define RESISTOR_LEFT A1
 #define RESISTOR_RIGHT A0
 
-
 //period in microseconds
 #define CLOCK_PERIOD 500
 
