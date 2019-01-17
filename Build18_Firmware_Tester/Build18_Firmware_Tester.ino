@@ -14,7 +14,6 @@ void loop() {
     if(pin > 13 || pin < 0){
       return;
     }
-    
     if(action.indexOf("0") >= 0){
       pinMode(pin, OUTPUT);
       digitalWrite(pin, LOW);
