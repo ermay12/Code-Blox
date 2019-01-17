@@ -10,6 +10,7 @@
 #define RESISTOR_LEFT A1
 #define RESISTOR_RIGHT A0
 
+
 //period in microseconds
 #define CLOCK_PERIOD 500
 
@@ -37,7 +38,7 @@
 #define COMMAND_WIDTH 5
 #define DATA_WIDTH 10
 #define CYCLE_PERIOD 20
-#define BLINK_PERIOD_MS = 500
+#define BLINK_PERIOD_MS 500
 
 
 void setup() {
@@ -56,6 +57,8 @@ void setup() {
   //set all outputs to off
   digitalWrite(LED_GREEN, HIGH);
   digitalWrite(LED_RED, LOW);
+
+  delay(1000);
 }
 
 bool enabled = false;
@@ -284,7 +287,7 @@ void loop() {
                 is_initialized = false;
                 digitalWrite(LED_GREEN, HIGH);
                 digitalWrite(LED_RED, LOW);
-                clearOutputs();
+                pinMode(DATA, INPUT);
                 break;
             }
           }

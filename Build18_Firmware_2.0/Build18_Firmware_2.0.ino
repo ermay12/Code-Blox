@@ -103,7 +103,11 @@ void debounceClock(){
 
 bool readEnablePins(bool rising_clock_edge, bool falling_clock_edge){
   if(rising_clock_edge){
-    //TODO
+    pinMode(ENABLE_TOP, INPUT);
+    pinMode(ENABLE_RIGHT, INPUT);
+    if(digitalRead(ENABLE_TOP) == HIGH|| digitalRead(ENABLE_RIGHT) == HIGH){
+      
+    }
   } else if (falling_clock_edge){
     //TODO
   }
