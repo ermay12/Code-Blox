@@ -12,7 +12,7 @@
 
 
 //period in microseconds
-#define CLOCK_PERIOD 500
+#define CLOCK_PERIOD 250
 
 //time (microseconds) to wait before a state change is accepted
 #define DEBOUNCE_DELAY CLOCK_PERIOD/16
