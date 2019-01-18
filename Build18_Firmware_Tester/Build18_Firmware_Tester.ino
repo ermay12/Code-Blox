@@ -21,9 +21,11 @@ bool left_write = false;
 bool clock_write = false;
 bool data_write = false;
 
+bool clock_input = false;
+bool data_input = false;
 
 void setup() {
-
+  
   pinMode(CLOCK, OUTPUT);
   digitalWrite(CLOCK, LOW);
 
@@ -37,10 +39,11 @@ void setup() {
 
   pinMode(DATA_LED, OUTPUT);
   pinMode(CLOCK_LED, OUTPUT);
-  pinMode(ENB_TOP, OUTPUT);
-  pinMode(ENB_RIGHT, OUTPUT);
-  pinMode(ENB_BOTTOM, OUTPUT);
-  pinMode(ENB_LEFT, OUTPUT);  
+  pinMode(ENB_TOP_LED, OUTPUT);
+  pinMode(ENB_RIGHT_LED, OUTPUT);
+  pinMode(ENB_BOTTOM_LED, OUTPUT);
+  pinMode(ENB_LEFT_LED, OUTPUT);  
+
   
   Serial.begin(9600);
   while (!Serial) {
@@ -49,27 +52,33 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(CLOCK_LED, clock_write);
-  digitalWrite(DATA_LED, data_write);
+  if(!clock_input){
+    digitalWrite(CLOCK_LED, clock_write);
+  }
+  if(!data_input){
+    digitalWrite(DATA_LED, data_write);
+  }else{
+    digitalWrite(DATA_LED, digitalRead(DATA));
+  }
   if(top_write){
     digitalWrite(ENB_TOP_LED, LOW);
   }else {
-    digitalWrite(ENB_TOP_LED, HIGH);
+    digitalWrite(ENB_TOP_LED, digitalRead(ENB_TOP));
   }
   if(right_write){
     digitalWrite(ENB_RIGHT_LED, LOW);
   }else {
-    digitalWrite(ENB_RIGHT_LED, HIGH);
+    digitalWrite(ENB_RIGHT_LED, digitalRead(ENB_RIGHT));
   }
   if(bottom_write){
     digitalWrite(ENB_BOTTOM_LED, LOW);
   }else {
-    digitalWrite(ENB_BOTTOM_LED, HIGH);
+    digitalWrite(ENB_BOTTOM_LED, digitalRead(ENB_BOTTOM));
   }
   if(left_write){
     digitalWrite(ENB_LEFT_LED, LOW);
   }else {
-    digitalWrite(ENB_LEFT_LED, HIGH);
+    digitalWrite(ENB_LEFT_LED, digitalRead(ENB_LEFT));
   }
   
   if (Serial.available()) {
@@ -108,49 +117,67 @@ void loop() {
           address = "enb left";
           break;
         case CLOCK:
+          clock_input = false;
           clock_write = false;
           pinMode(CLOCK, OUTPUT);
           digitalWrite(CLOCK, LOW);
           address = "clock";
+          break;
         case DATA:
+          data_input = false;
           data_write = false;
           pinMode(DATA, OUTPUT);
           digitalWrite(DATA, LOW); 
           address = "data";
+          break;
       }
       Serial.println("Wrote a low to " + address); 
     }else if(action.indexOf("1") >= 0){
-      //TODO add sting representation of each pin
-      //case for clock and data
-      //replace resistors with wires
-      //figure out why enb's don't write. probably wires tbh but check anyway
+      String address = "";
       switch(pin){
         case ENB_TOP:
+          address = "enb top";
           top_write = false;
           pinMode(ENB_TOP, INPUT_PULLUP);
           break;
         case ENB_RIGHT:
+          address = "enb right";
           right_write = false;
           pinMode(ENB_RIGHT, INPUT_PULLUP);
           digitalWrite(ENB_RIGHT, LOW);
           break;
         case ENB_BOTTOM:
+          address = "enb bottom";
           bottom_write = false;
           pinMode(ENB_BOTTOM, INPUT_PULLUP);
           break;
         case ENB_LEFT:
+          address = "enb left";
           left_write = false;
           pinMode(ENB_LEFT, INPUT_PULLUP);
           break;
-        default:
-          pinMode(pin, OUTPUT);
-          digitalWrite(pin, HIGH);
+        case CLOCK:
+          clock_input = false;
+          clock_write = true;
+          pinMode(CLOCK, OUTPUT);
+          digitalWrite(CLOCK, HIGH);
+          address = "clock";
+          break;
+        case DATA:
+          data_input = false;
+          data_write = true;
+          pinMode(DATA, OUTPUT);
+          digitalWrite(DATA, HIGH);
+          address = "data";
+          break;
       }
-      Serial.println("Wrote a high to pin " + String(pin));
+      Serial.println("Wrote a high to pin " + address);
     }else{ //assume we want to read the pin
       bool value = false;
+      String address = "";
       switch(pin){
         case ENB_TOP:
+          address = "enb top";
           if(top_write){
             value = false;
           }else{
@@ -158,6 +185,7 @@ void loop() {
           }
           break;
         case ENB_RIGHT:
+          address = "enb right";
           if(right_write){
             value = false;
           }else{
@@ -165,6 +193,7 @@ void loop() {
           }
           break;
         case ENB_BOTTOM:
+          address = "enb bottom";
           if(bottom_write){
             value = false;
           }else{
@@ -172,17 +201,29 @@ void loop() {
           }
           break;
         case ENB_LEFT:
+          address = "enb left";
           if(left_write){
             value = false;
           }else{
             value = digitalRead(ENB_LEFT);
           }
           break;
-        default:
-          pinMode(pin, INPUT);
-          value = digitalRead(pin);
+        case CLOCK:
+          clock_input = true;
+          address = "clock";
+          pinMode(CLOCK, INPUT);
+          delay(1);
+          value = digitalRead(CLOCK);
+          break;
+        case DATA:
+          data_input = true;
+          address = "data";
+          pinMode(DATA, INPUT);
+          delay(1);
+          value = digitalRead(DATA);
+          break;
       }
-      Serial.println("Pin " + String(pin) + " is a logical " + String(value));
+      Serial.println(address + " is a logical " + String(value));
     }
   }
 

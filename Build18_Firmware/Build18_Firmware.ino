@@ -171,8 +171,28 @@ void loop() {
     pinMode(ENABLE_LEFT, INPUT_PULLUP);
 
     if(enabled){
-      if(cycle_count < ID_WIDTH + COMMAND_WIDTH){
+      if(((cycle_count+1)%CYCLE_PERIOD) < ID_WIDTH + COMMAND_WIDTH ){
         pinMode(DATA, INPUT);
+        if(cycle_count == CYCLE_PERIOD - 1){
+          switch(command){
+            case COMMAND_ENABLE_TOP:
+              pinMode(ENABLE_TOP, OUTPUT);
+              digitalWrite(ENABLE_TOP, LOW);
+              break;
+            case COMMAND_ENABLE_RIGHT:
+              pinMode(ENABLE_RIGHT, OUTPUT);
+              digitalWrite(ENABLE_RIGHT, LOW);
+              break;
+            case COMMAND_ENABLE_BOTTOM:
+              pinMode(ENABLE_BOTTOM, OUTPUT);
+              digitalWrite(ENABLE_BOTTOM, LOW);
+              break;
+            case COMMAND_ENABLE_LEFT:
+              pinMode(ENABLE_LEFT, OUTPUT);
+              digitalWrite(ENABLE_LEFT, LOW);
+              break;
+          }
+        }  
       } else if(is_addressed){
         pinMode(DATA, OUTPUT);
         switch(command){
@@ -180,34 +200,10 @@ void loop() {
             digitalWrite(DATA, HIGH);
             break;
           case COMMAND_LEFT_RESISTOR:
-            digitalWrite(DATA,!(1&(analogRead(RESISTOR_LEFT)>>(cycle_count - ID_WIDTH - COMMAND_WIDTH))));
+            digitalWrite(DATA,(1&(analogRead(RESISTOR_LEFT)>>(((cycle_count+1)%CYCLE_PERIOD) - ID_WIDTH - COMMAND_WIDTH))));
             break;
           case COMMAND_RIGHT_RESISTOR:
-            digitalWrite(DATA,!(1&(analogRead(RESISTOR_RIGHT)>>(cycle_count - ID_WIDTH - COMMAND_WIDTH))));
-            break;
-          case COMMAND_ENABLE_TOP:
-            if(cycle_count == CYCLE_PERIOD - 1){
-              pinMode(ENABLE_TOP, OUTPUT);
-              digitalWrite(ENABLE_TOP, LOW);
-            }
-            break;
-          case COMMAND_ENABLE_RIGHT:
-            if(cycle_count == CYCLE_PERIOD - 1){
-              pinMode(ENABLE_RIGHT, OUTPUT);
-              digitalWrite(ENABLE_RIGHT, LOW);
-            }
-            break;
-          case COMMAND_ENABLE_BOTTOM:
-            if(cycle_count == CYCLE_PERIOD - 1){
-              pinMode(ENABLE_BOTTOM, OUTPUT);
-              digitalWrite(ENABLE_BOTTOM, LOW);
-            }
-            break;
-          case COMMAND_ENABLE_LEFT:
-            if(cycle_count == CYCLE_PERIOD - 1){
-              pinMode(ENABLE_LEFT, OUTPUT);
-              digitalWrite(ENABLE_LEFT, LOW);
-            }
+            digitalWrite(DATA,(1&(analogRead(RESISTOR_RIGHT)>>(((cycle_count+1)%CYCLE_PERIOD) - ID_WIDTH - COMMAND_WIDTH))));
             break;
           default:
             digitalWrite(DATA, LOW);
@@ -250,24 +246,23 @@ void loop() {
             command = command | (data_state << (cycle_count-ID_WIDTH));
           }else{
             switch(command){
+              case COMMAND_CHIRP:
+                digitalWrite(DATA, HIGH);
+                break;
               case COMMAND_GREEN_OFF:
                 digitalWrite(LED_GREEN, LOW);
-                is_addressed = false;
                 green_blinking = false;
                 break;
               case COMMAND_RED_OFF:
                 digitalWrite(LED_RED, LOW);
-                is_addressed = false;
                 red_blinking = false;
                 break;
               case COMMAND_GREEN_ON:
                 digitalWrite(LED_GREEN, HIGH);
-                is_addressed = false;
                 green_blinking = false;
                 break;
               case COMMAND_RED_ON:
                 digitalWrite(LED_RED, HIGH);
-                is_addressed = false;
                 red_blinking = false;
                 break;
               case COMMAND_GREEN_BLINK:
