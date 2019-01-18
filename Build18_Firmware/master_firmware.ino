@@ -33,7 +33,7 @@ char message_buffer[100];
 bool enable_first_tile(unsigned int id){
   pinMode(ENABLE, OUTPUT);
   digitalWrite(ENABLE, LOW);
-  unsigned int result = send_recieve(id, COMMAND_GREEN_BLINK);
+  unsigned int result = send_receive(id, COMMAND_GREEN_BLINK);
   pinMode(ENABLE, INPUT_PULLUP);
   if( result == 0x3ff ){
     return true;
@@ -41,7 +41,7 @@ bool enable_first_tile(unsigned int id){
   return false;
 }
 
-unsigned int send_recieve(unsigned int id, unsigned int cmd){
+unsigned int send_receive(unsigned int id, unsigned int cmd){
   
   for(int i = 0; i < 5; i++){
     digitalWrite(CLOCK, LOW);
@@ -105,13 +105,13 @@ void reset_blocks(){
 
 void traverse_blocks(int row, int col){
   int my_id = id;
-  blocks_id[row][col] = my_id;
-  int l_volt = send_receive(id, COMMAND_LEFT_RESISTOR, 0);
-  int r_volt = send_receive(id, COMMAND_RIGHT_RESISTOR, 0);
+  block_ids[row][col] = my_id;
+  int l_volt = send_receive(id, COMMAND_LEFT_RESISTOR);
+  int r_volt = send_receive(id, COMMAND_RIGHT_RESISTOR);
   char l_res = volt_to_resistance(l_volt);
   char r_res = volt_to_resistance(r_volt);
-  l_resistors = [row][col] = l_res;
-  r_resistors = [row][col] = r_res;
+  l_resistors[row][col] = l_res;
+  r_resistors[row][col] = r_res;
 
   send_receive(my_id, COMMAND_ENABLE_RIGHT);
   if (send_receive(id+1, COMMAND_CHIRP)){
@@ -119,12 +119,12 @@ void traverse_blocks(int row, int col){
     traverse_blocks(row, col+1);
   }
   send_receive(my_id, COMMAND_ENABLE_BOTTOM);
-  if (send_receive(id+1, COMMAND_CHIRP){
+  if (send_receive(id+1, COMMAND_CHIRP)){
     id++;
     traverse_blocks(row + 1, col);
   }
-  send_recieve(my_id, COMMAND_ENABLE_LEFT, id+1
-  if (send_recieve(id+1, COMMAND_CHIRP){
+  send_receive(my_id, COMMAND_ENABLE_LEFT);
+  if (send_receive(id+1, COMMAND_CHIRP)){
     id++;
     traverse_blocks(row, col-1);
   }
@@ -134,7 +134,7 @@ void send_blocks(){
   int index = 0;
   for (int i = 0; i < 10; i++){
     for (int j = 0; j < 10; j++){
-      if (block_id[i][j]){
+      if (block_ids[i][j]){
         message_buffer[index] = i;
         index++;
         message_buffer[index] = j;
@@ -150,7 +150,7 @@ void send_blocks(){
   index = 0;
   while (message_buffer[index] != -1) { //tx data
     Serial.write(message_buffer[index]);
-    dataPos += 1;
+    index += 1;
   }
 }
 
